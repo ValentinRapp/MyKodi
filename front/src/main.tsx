@@ -1,9 +1,30 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Sidebar } from "./components/sidebar";
+import './assets/tailwind.css';
+import { Home } from "./router/Home";
+import { Settings } from "./router/Settings";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Sidebar />,
+    children: [
+      {
+        path: "/",
+        element: <Home />
+      },
+      {
+        path: "/settings",
+        element: <Settings />
+      }
+    ]
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );
