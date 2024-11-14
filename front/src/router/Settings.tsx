@@ -37,7 +37,7 @@ export function Settings() {
   }, []);
 
   const fetchSources = async () => {
-    const paths = await fetch("http://localhost:3000/paths").then(res => res.json());
+    const paths = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths`).then(res => res.json());
     setSources(paths.paths.map((path: string) => ({ path, id: uuidv4() })));
   }
 
@@ -52,7 +52,7 @@ export function Settings() {
       return;
     }
 
-    const res = await fetch("http://localhost:3000/paths/add", {
+    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/add`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -68,7 +68,7 @@ export function Settings() {
 
   return (
     <div>
-      <h1 className="text-6xl m-6" >Settings</h1>
+      <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
         <h2 className="text-4xl" >Sources</h2>
         <ul>
@@ -83,7 +83,7 @@ export function Settings() {
                 className="btn btn-square btn-error ml-2"
                 onClick={() => {
                   setSources(sources.filter(s => s.id !== source.id));
-                  fetch(`http://localhost:3000/paths/remove`, {
+                  fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json"

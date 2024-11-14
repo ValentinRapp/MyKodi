@@ -12,9 +12,9 @@
   "app": {
     "windows": [
       {
-        "title": "epikodi",
-        "width": 800,
-        "height": 600
+        "title": "EpiKodi",
+        "width": 1280,
+        "height": 720
       }
     ],
     "security": {

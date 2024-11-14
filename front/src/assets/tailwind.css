@@ -6,3 +6,9 @@
     font-family: 'Helvetica-rounded-bold';
     src: url('/helvetica-rounded-bold.woff') format('woff');
 }
+
+* {
+    /* -webkit-user-select: none; */
+    -webkit-user-drag: none;
+    cursor: default !important;
+}
