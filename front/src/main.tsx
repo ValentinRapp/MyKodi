@@ -5,6 +5,7 @@ import { Sidebar } from "./components/sidebar";
 import './assets/tailwind.css';
 import { Home } from "./router/Home";
 import { Settings } from "./router/Settings";
+import { Media } from "./router/Media";
 
 const router = createBrowserRouter([
   {
@@ -18,9 +19,13 @@ const router = createBrowserRouter([
       {
         path: "/settings",
         element: <Settings />
-      }
+      },
     ]
   },
+  {
+    path: "/media/:mediaName",
+    element: <Media />
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
