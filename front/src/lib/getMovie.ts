@@ -19,3 +19,18 @@ export const getMovie = async (media: Partial<Media>): Promise<any> => {
 
     return movieData;
 }
+
+export const getTrailer = async (media: Partial<Media>): Promise<string> => {
+    const searchRes = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${media.name?.split('.')[0]}`);
+    let movieID: number;
+
+    try {
+        movieID = (await searchRes.json()).results[0].id;
+    } catch (e) {
+        return '';
+    }
+
+    const trailerData = await fetch(`https://api.themoviedb.org/3/movie/${movieID}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json());
+
+    return `https://www.youtube.com/watch?v=${trailerData.results[0].key}`;
+}

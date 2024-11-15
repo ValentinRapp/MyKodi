@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { getMovie } from "../lib/getMovie";
+import { getMovie, getTrailer } from "../lib/getMovie";
+import { StarRating } from "../components/star_rating";
 
 export function Media() {
 
   const { mediaName } = useParams();
 
   const [movieData, setMovieData] = useState<any>(null);
+  const [trailerURL, setTrailerURL] = useState<string>('');
 
   useEffect(() => {
     fetchMovieDetails();
@@ -14,14 +16,16 @@ export function Media() {
 
   const fetchMovieDetails = async () => {
     const movie = await getMovie({ name: mediaName });
+    const trailer = await getTrailer({ name: mediaName });
     setMovieData(movie);
+    setTrailerURL(trailer);
   }
 
   return (
     <div>
       {!movieData ?
         <div className="h-screen flex items-center justify-center">
-          <span className="loading loading-dots loading-lg w-3/12">sexe</span>
+          <span className="loading loading-dots loading-lg w-3/12" />
         </div>
         :
         <div className="m-4">
@@ -42,7 +46,7 @@ export function Media() {
               </svg>
             </NavLink>
             <h1
-              className="text-6xl"
+              className="text-6xl mt-2"
               style={{ fontFamily: "Helvetica-rounded-bold" }}
             >
               {movieData.original_title}
@@ -58,7 +62,8 @@ export function Media() {
               />
             </div>
             <div className="m-6 text-2xl">
-              <p>{movieData.release_date.split('-')[0]} - {movieData.vote_average}/10 - {movieData.genres.map((genre: any) => genre.name).join(", ")}</p>
+              <p>{movieData.release_date.split('-')[0]} - {movieData.genres.map((genre: any) => genre.name).join(", ")}</p>
+              <StarRating note={movieData.vote_average} maxNote={10} nbStars={5} />
               <br />
               <p>{movieData.overview}</p>
               <br />
@@ -73,6 +78,13 @@ export function Media() {
                   <polygon points="40,30 70,50 40,70" fill="black" />
                 </svg>
               </button>
+              <a
+                href={trailerURL}
+                target="_blank"
+                className="btn btn-primary ml-2"
+              >
+                Watch trailer
+              </a>
             </div>
           </div>
         </div>
