@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { queryClient } from "../main";
+import { fetchHome, fetchSettings } from "../lib/fetchData";
 
 export function Sidebar() {
   return (
@@ -31,6 +33,7 @@ export function Sidebar() {
             <NavLink
               to="/"
               end
+              onMouseOver={() => queryClient.prefetchQuery('home', fetchHome)}
               className={({ isActive }) =>
                 isActive ? "active text-primary" : ""
               }
@@ -41,6 +44,7 @@ export function Sidebar() {
           <li>
             <NavLink
               to="/settings"
+              onMouseOver={() => queryClient.prefetchQuery('settings', fetchSettings)}
               className={({ isActive }) =>
                 isActive ? "active text-primary" : ""
               }

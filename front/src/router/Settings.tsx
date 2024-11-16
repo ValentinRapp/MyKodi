@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import { v4 as uuidv4 } from 'uuid';
+import { fetchSettings } from "../lib/fetchData";
 
 type Source = {
   path: string;
@@ -30,15 +32,20 @@ function TextEdit(props: {
 
 export function Settings() {
 
+  const { data, isError } = useQuery<Source[]>('settings', fetchSettings);
+
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
-    fetchSources();
-  }, []);
+    setSources(data || []);
+  }, [data]);
 
-  const fetchSources = async () => {
-    const paths = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths`).then(res => res.json());
-    setSources(paths.paths.map((path: string) => ({ path, id: uuidv4() })));
+  if (isError) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-2xl text-red-500">An error occurred</p>
+      </div>
+    )
   }
 
   const addSource = async (path: string) => {

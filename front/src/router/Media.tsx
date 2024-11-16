@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { getMovie, getTrailer } from "../lib/getMovie";
 import { StarRating } from "../components/star_rating";
+import { useQuery } from "react-query";
 
 function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }) {
   return (
@@ -36,8 +37,7 @@ function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }
 export function Media() {
 
   const { mediaName } = useParams();
-
-  const [movieData, setMovieData] = useState<any>(null);
+  const { data, isLoading, isError } = useQuery(`media-${mediaName}`, () => getMovie({ name: mediaName }));
   const [trailerID, setTrailerID] = useState<string>('');
 
   const goBackSVG = (
@@ -68,76 +68,75 @@ export function Media() {
     </svg>
   );
 
-  useEffect(() => {
-    fetchMovieDetails();
-  }, []);
-
-  const fetchMovieDetails = async () => {
-    const movie = await getMovie({ name: mediaName });
-    setMovieData(movie);
-  }
-
   const handleCloseModal = () => {
     setTrailerID("");
     const dialog = document.getElementById("trailer_modal") as HTMLDialogElement;
     if (dialog) dialog.close();
   };
 
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <span className="loading loading-dots loading-lg w-3/12" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <p className="text-2xl text-red-500">An error occurred</p>
+      </div>
+    )
+  }
+
   return (
-    <div>
-      {!movieData ?
-        <div className="h-screen flex items-center justify-center">
-          <span className="loading loading-dots loading-lg w-3/12" />
+    <div className="m-4">
+      <div className="flex items-center justify-center relative mb-4">
+        <NavLink className="btn btn-circle btn-outline absolute left-0 ml-2" to="/">
+          {goBackSVG}
+        </NavLink>
+        <h1
+          className="text-6xl mt-2"
+          style={{ fontFamily: "Helvetica-rounded-bold" }}
+        >
+          {data.original_title}
+        </h1>
+      </div>
+      <div className="flex grid grid-cols-2">
+        <div className="flex justify-center align-center">
+          <img
+            src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${data.poster_path}`}
+            alt={`${data.original_title} poster`}
+            className="rounded-lg"
+            width={500}
+          />
         </div>
-        :
-        <div className="m-4">
-          <div className="flex items-center justify-center relative mb-4">
-            <NavLink className="btn btn-circle btn-outline absolute left-0 ml-2" to="/">
-              {goBackSVG}
-            </NavLink>
-            <h1
-              className="text-6xl mt-2"
-              style={{ fontFamily: "Helvetica-rounded-bold" }}
-            >
-              {movieData.original_title}
-            </h1>
-          </div>
-          <div className="flex grid grid-cols-2">
-            <div className="flex justify-center align-center">
-              <img
-                src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${movieData.poster_path}`}
-                alt={`${movieData.original_title} poster`}
-                className="rounded-lg"
-                width={500}
-              />
-            </div>
-            <div className="m-6 text-2xl">
-              <p>{movieData.release_date.split('-')[0]} - {movieData.genres.map((genre: any) => genre.name).join(", ")}</p>
-              <StarRating note={movieData.vote_average} maxNote={10} nbStars={5} />
-              <br />
-              <p>{movieData.overview}</p>
-              <br />
-              <div className="flex">
-                <button className="btn btn-primary">
-                  {playButtonSVG}
-                </button>
-                <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
-                <div>
-                  <button
-                    className="btn btn-neutral ml-2"
-                    onClick={async () => {
-                      (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
-                      setTrailerID(await getTrailer({ name: mediaName }));
-                    }}
-                  >
-                    Watch trailer
-                  </button>
-                </div>
-              </div>
+        <div className="m-6 text-2xl">
+          <p>{data.release_date.split('-')[0]} - {data.genres.map((genre: any) => genre.name).join(", ")}</p>
+          <StarRating note={data.vote_average} maxNote={10} nbStars={5} />
+          <br />
+          <p>{data.overview}</p>
+          <br />
+          <div className="flex">
+            <button className="btn btn-primary">
+              {playButtonSVG}
+            </button>
+            <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
+            <div>
+              <button
+                className="btn btn-neutral ml-2"
+                onClick={async () => {
+                  (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
+                  setTrailerID(await getTrailer({ name: mediaName }));
+                }}
+              >
+                Watch trailer
+              </button>
             </div>
           </div>
         </div>
-      }
+      </div>
     </div>
   )
 }
