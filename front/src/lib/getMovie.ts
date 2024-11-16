@@ -32,5 +32,5 @@ export const getTrailer = async (media: Partial<Media>): Promise<string> => {
 
     const trailerData = await fetch(`https://api.themoviedb.org/3/movie/${movieID}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json());
 
-    return `https://www.youtube.com/watch?v=${trailerData.results[0].key}`;
+    return trailerData.results[0].key;
 }
