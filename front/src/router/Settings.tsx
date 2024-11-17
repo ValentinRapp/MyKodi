@@ -55,16 +55,12 @@ export function Settings() {
     
     setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
 
-    if (paths.length !== newPaths.length) {
-      return;
-    }
-
-    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/add`, {
+    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ path })
+      body: JSON.stringify({ paths: newPaths })
     });
 
     if (!res.ok) {
@@ -77,10 +73,10 @@ export function Settings() {
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <h2 className="text-4xl" >Sources</h2>
+        <h2 className="text-4xl mb-2" >Sources</h2>
         <ul>
           {sources.map(source => (
-            <li key={source.id} className="flex my-2">
+            <li key={source.id} className="flex mb-2">
               <TextEdit
                 value={source.path}
                 onChange={e => setSources(sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}

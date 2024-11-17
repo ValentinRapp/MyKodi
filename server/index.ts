@@ -31,6 +31,22 @@ fastify.post('/paths/add', async (req, rep): Promise<Paths | { error: string }> 
     return { paths };
 });
 
+fastify.post('/paths/update', async (req, rep): Promise<Paths | { error: string }> => {
+    const { paths } = req.body as { paths: string[] };
+
+    for (const path of paths) {
+        try {
+            await readdir(path);
+        } catch (err) {
+            rep.code(400);
+            return { error: "Invalid path" };
+        }
+    }
+
+    Bun.write("paths.json", JSON.stringify({ paths }));
+    return { paths };
+});
+
 fastify.post('/paths/remove', async (req, rep): Promise<Paths> => {
     const { path } = req.body as { path: string };
     const pathsFile = Bun.file("paths.json");
