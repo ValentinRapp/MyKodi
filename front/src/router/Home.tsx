@@ -3,6 +3,8 @@ import { getMovie } from "../lib/getMovie";
 import { queryClient } from "../main";
 import { useQuery } from "react-query";
 import { fetchHome } from "../lib/fetchData";
+import { useEffect, useState } from "react";
+import { GenresDropdown } from "../components/genres_dropdown";
 
 export type Media = {
   name: string;
@@ -14,6 +16,14 @@ export type Media = {
 export function Home() {
 
   const { data, isLoading, isError } = useQuery<Media[]>('home', fetchHome);
+  const [genres, setGenres] = useState<string[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+
+  useEffect(() => {
+    const tempGenres = Array.from(new Set(data?.map(media => media.details.genres.map((genre: any) => genre.name)).flat()))
+    setGenres(tempGenres);
+    setSelectedGenres(tempGenres);
+  }, [data]);
 
   const navigate = useNavigate();
 
@@ -40,6 +50,7 @@ export function Home() {
   return (
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Home</h1>
+      <GenresDropdown genres={genres} selectedGenres={selectedGenres} setSelectedGenres={setSelectedGenres} />
       <div className="flex flex-wrap justify-center">
         {data?.map(media => (
           <div
