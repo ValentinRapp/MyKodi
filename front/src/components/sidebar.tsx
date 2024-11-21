@@ -6,7 +6,7 @@ export function Sidebar() {
   return (
     <div className="drawer lg:drawer-open">
       <input id="drawer" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex justify-center">
+      <div className="drawer-content">
         <Outlet />
         <label htmlFor="drawer" className="btn btn-square btn-ghost absolute left-2 top-2 lg:hidden">
           <svg

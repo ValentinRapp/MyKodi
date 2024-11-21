@@ -50,24 +50,32 @@ export function Home() {
   return (
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Home</h1>
-      <GenresDropdown genres={genres} selectedGenres={selectedGenres} setSelectedGenres={setSelectedGenres} />
+      <div className="flex justify-center">
+        <GenresDropdown
+          genres={genres}
+          selectedGenres={selectedGenres}
+          setSelectedGenres={setSelectedGenres}
+        />
+      </div>
       <div className="flex flex-wrap justify-center">
-        {data?.map(media => (
-          <div
-            key={media.id}
-            className="card"
-            onMouseOver={() => prefetchMediaDetails(media.name)}
-            onClick={() => navigate(`/media/${media.name}`)}
-          >
-            <div className="m-4 transition-transform duration-300 transform hover:scale-110">
-              <img
-                src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${media.details.poster_path}`}
-                alt={`${media.details.original_title} poster`}
-                className="rounded-lg"
-                width={200}
-              />
+        {data
+          ?.filter(media => selectedGenres.some(genre => media.details.genres.map((genre: any) => genre.name).includes(genre)))
+          .map(media => (
+            <div
+              key={media.id}
+              className="card"
+              onMouseOver={() => prefetchMediaDetails(media.name)}
+              onClick={() => navigate(`/media/${media.name}`)}
+            >
+              <div className="m-4 transition-transform duration-300 transform hover:scale-110">
+                <img
+                  src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${media.details.poster_path}`}
+                  alt={`${media.details.original_title} poster`}
+                  className="rounded-lg"
+                  width={200}
+                />
+              </div>
             </div>
-          </div>
         ))}
       </div>
     </div>

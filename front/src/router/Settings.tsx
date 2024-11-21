@@ -52,7 +52,7 @@ export function Settings() {
 
     const paths = sources.map(s => s.path);
     const newPaths = Array.from(new Set(paths));
-    
+
     setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
 
     const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/update`, {
@@ -72,40 +72,46 @@ export function Settings() {
   return (
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
-      <div>
-        <h2 className="text-4xl mb-2" >Sources</h2>
-        <ul>
-          {sources.map(source => (
-            <li key={source.id} className="flex mb-2">
-              <TextEdit
-                value={source.path}
-                onChange={e => setSources(sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
-                saveCallback={addSource}
-              />
+      <div className="flex justify-center">
+        <div>
+          <h2 className="text-4xl mb-2" >Sources</h2>
+          <div className="flex">
+            <div>
+              <ul>
+                {sources.map(source => (
+                  <li key={source.id} className="flex mb-2">
+                    <TextEdit
+                      value={source.path}
+                      onChange={e => setSources(sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
+                      saveCallback={addSource}
+                    />
+                    <button
+                      className="btn btn-square btn-error ml-2"
+                      onClick={() => {
+                        setSources(sources.filter(s => s.id !== source.id));
+                        fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json"
+                          },
+                          body: JSON.stringify({ path: source.path })
+                        });
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  </li>
+                ))}
+              </ul>
               <button
-                className="btn btn-square btn-error ml-2"
-                onClick={() => {
-                  setSources(sources.filter(s => s.id !== source.id));
-                  fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ path: source.path })
-                  });
-                }}
+                className="btn btn-square btn-primary w-full"
+                onClick={() => setSources([...sources, { path: "", id: uuidv4() }])}
               >
-                🗑️
+                +
               </button>
-            </li>
-          ))}
-          <button
-            className="btn btn-square btn-primary w-full"
-            onClick={() => setSources([...sources, { path: "", id: uuidv4() }])}
-          >
-            +
-          </button>
-        </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
