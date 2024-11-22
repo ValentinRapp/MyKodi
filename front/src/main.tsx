@@ -31,8 +31,25 @@ const router = createBrowserRouter([
 
 export const queryClient = new QueryClient();
 
+function ThemeHandler() {
+  
+  document.querySelector('html')
+  ?.setAttribute('data-theme', localStorage.getItem('theme') || 'dracula')
+
+  window.addEventListener("storage", () => {
+    
+    console.log('storage event');
+
+    document.querySelector('html')
+    ?.setAttribute('data-theme', localStorage.getItem('theme') || 'dracula')
+  });
+  
+  return null;
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
+    <ThemeHandler />
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>

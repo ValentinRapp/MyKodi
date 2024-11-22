@@ -123,17 +123,15 @@ export function Media() {
               {playButtonSVG}
             </button>
             <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
-            <div>
-              <button
-                className="btn btn-neutral ml-2"
-                onClick={async () => {
-                  (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
-                  setTrailerID(await getTrailer({ name: mediaName }));
-                }}
-              >
-                Watch trailer
-              </button>
-            </div>
+            {/* <button
+              className="btn btn-neutral ml-2"
+              onClick={async () => {
+                (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
+                setTrailerID(await getTrailer({ name: mediaName }));
+              }}
+            >
+              Watch trailer
+            </button> */}
           </div>
         </div>
       </div>

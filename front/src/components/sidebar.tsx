@@ -35,7 +35,7 @@ export function Sidebar() {
               end
               onMouseOver={() => queryClient.prefetchQuery('home', fetchHome)}
               className={({ isActive }) =>
-                isActive ? "active text-primary" : ""
+                isActive ? "bg-base-300" : ""
               }
             >
               Home
@@ -46,7 +46,7 @@ export function Sidebar() {
               to="/settings"
               onMouseOver={() => queryClient.prefetchQuery('settings', fetchSettings)}
               className={({ isActive }) =>
-                isActive ? "active text-primary" : ""
+                isActive ? "bg-base-300" : ""
               }
             >
               Settings
