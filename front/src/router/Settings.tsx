@@ -192,7 +192,7 @@ export function Settings() {
             </div>
           </div>
         </div>
-        {/* <div>
+        <div>
           <div className="flex justify-center mt-6">
             <div>
               <h2 className="text-4xl mb-2 flex justify-center" >Theme</h2>
@@ -203,7 +203,7 @@ export function Settings() {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );

@@ -123,7 +123,7 @@ export function Media() {
               {playButtonSVG}
             </button>
             <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
-            {/* <button
+            <button
               className="btn btn-neutral ml-2"
               onClick={async () => {
                 (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
@@ -131,7 +131,7 @@ export function Media() {
               }}
             >
               Watch trailer
-            </button> */}
+            </button>
           </div>
         </div>
       </div>
