@@ -40,3 +40,11 @@ export const fetchMovie = async (filename: string) => {
   const title = (await getMovie({ name: filename })).original_title;
   return { link, title };
 }
+
+export const getMediaInfo = async (filename: string) => {
+  const movieDetails = await getMovie({ name: filename });
+  const favorite = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/favorites`)
+    .then(res => res.json())
+    .then(data => data.favorites.includes(filename));
+  return { ...movieDetails, favorite };
+}

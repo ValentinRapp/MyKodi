@@ -10,7 +10,7 @@ await fastify.register(cors, {
 });
 
 fastify.get('/paths', async (req, rep): Promise<Paths> => {
-    const paths = Bun.file("paths.json");
+    const paths = Bun.file("save.json");
     return paths.json();
 });
 
@@ -24,10 +24,10 @@ fastify.post('/paths/add', async (req, rep): Promise<Paths | { error: string }> 
         return { error: "Invalid path" };
     }
 
-    const pathsFile = Bun.file("paths.json");
+    const pathsFile = Bun.file("save.json");
     let paths: string[] = (await pathsFile.json() as Paths).paths;
     paths = Array.from(new Set([...paths, path]));
-    Bun.write("paths.json", JSON.stringify({ paths }));
+    Bun.write("save.json", JSON.stringify({ paths, favorites: (await pathsFile.json()).favorites }));
     return { paths };
 });
 
@@ -43,22 +43,42 @@ fastify.post('/paths/update', async (req, rep): Promise<Paths | { error: string 
         }
     }
 
-    Bun.write("paths.json", JSON.stringify({ paths }));
+    Bun.write("save.json", JSON.stringify({ paths, favorites: (await Bun.file("save.json").json()).favorites }));
     return { paths };
 });
 
 fastify.post('/paths/remove', async (req, rep): Promise<Paths> => {
     const { path } = req.body as { path: string };
-    const pathsFile = Bun.file("paths.json");
+    const pathsFile = Bun.file("save.json");
     let paths: string[] = (await pathsFile.json() as Paths).paths;
     paths = paths.filter(p => p !== path);
-    Bun.write("paths.json", JSON.stringify({ paths }));
+    Bun.write("save.json", JSON.stringify({ paths, favorites: (await pathsFile.json()).favorites }));
     return { paths };
 });
 
+fastify.get('/favorites', async (req, rep): Promise<{ favorites: string[] }> => {
+    const save = Bun.file("save.json");
+    return { favorites: (await save.json()).favorites || [] };
+});
+
+fastify.post('/favorites/add', async (req, rep) => {
+    const save = Bun.file("save.json");
+    const { name } = req.body as { name: string };
+    let favorites: string[] = (await save.json()).favorites || [];
+    favorites = Array.from(new Set([...favorites, name]));
+    Bun.write("save.json", JSON.stringify({ paths: (await save.json()).paths, favorites }));
+});
+
+fastify.post('/favorites/remove', async (req, rep) => {
+    const save = Bun.file("save.json");
+    const { name } = req.body as { name: string };
+    let favorites: string[] = (await save.json()).favorites || [];
+    favorites = favorites.filter(f => f !== name);
+    Bun.write("save.json", JSON.stringify({ paths: (await save.json()).paths, favorites }));
+});
 
 fastify.get('/medias', async (req, rep): Promise<{ medias: Media[] } | null> => {
-    const paths: string[] = (await Bun.file("paths.json").json() as Paths).paths;
+    const paths: string[] = (await Bun.file("save.json").json() as Paths).paths;
     let medias: Media[] = [];
 
     for (const path of paths) {
@@ -80,7 +100,7 @@ fastify.get('/medias', async (req, rep): Promise<{ medias: Media[] } | null> => 
 fastify.get('/medias/:name', async (req, rep) => {
     const { name } = req.params as { name: string };
     
-    const sources: string[] = (await Bun.file("paths.json").json() as Paths).paths;
+    const sources: string[] = (await Bun.file("save.json").json() as Paths).paths;
     
     const paths = sources.map(source => `${source}/${name}`)
 
