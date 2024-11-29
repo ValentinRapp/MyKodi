@@ -7,6 +7,7 @@ import { Home } from "./router/Home";
 import { Settings } from "./router/Settings";
 import { Media } from "./router/Media";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { Player } from "./router/Player";
 
 const router = createBrowserRouter([
   {
@@ -25,7 +26,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/media/:mediaName",
-    element: <Media />
+    element: <Media />,
+  },
+  {
+    path: "/media/:mediaName/play",
+    element: <Player />
   }
 ]);
 

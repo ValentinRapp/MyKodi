@@ -3,6 +3,8 @@ import { NavLink, useParams } from "react-router-dom";
 import { getMovie, getTrailer } from "../lib/getMovie";
 import { StarRating } from "../components/star_rating";
 import { useQuery } from "react-query";
+import { queryClient } from "../main";
+import { fetchMovie } from "../lib/fetchData";
 
 function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }) {
   return (
@@ -119,9 +121,13 @@ export function Media() {
           <p>{data.overview}</p>
           <br />
           <div className="flex">
-            <button className="btn btn-primary">
+            <NavLink
+              to={`/media/${mediaName}/play`}
+              className="btn btn-primary"
+              onMouseOver={() => queryClient.prefetchQuery(`play-${mediaName}`, () => fetchMovie(mediaName as string))}
+            >
               {playButtonSVG}
-            </button>
+            </NavLink>
             <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
             <button
               className="btn btn-neutral ml-2"
