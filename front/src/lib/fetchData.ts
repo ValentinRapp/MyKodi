@@ -4,16 +4,24 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const fetchHome = async () => {
   const data = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/medias`).then(res => res.json());
-  const details = await Promise.all(data.medias.map(async (media: Partial<Media>) => {
+
+  let details = await Promise.all(data.medias.map(async (media: Partial<Media>) => {
     return await getMovie(media);
-  }
-  ));
-  return data.medias.map((media: Partial<Media>) => ({
-    name: media.name,
-    source: media.source,
-    id: uuidv4(),
-    details: details[data.medias.indexOf(media)]
   }));
+
+  const favorites = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/favorites`)
+    .then(res => res.json())
+    .then(data => data.favorites);
+  
+  return data.medias.map((media: Partial<Media>) => {
+    favorites.includes(media.name) ? details[data.medias.indexOf(media)].genres.push({ name: "Favorited" }) : null;
+    return {
+      name: media.name,
+      source: media.source,
+      id: uuidv4(),
+      details: details[data.medias.indexOf(media)]
+    }
+  });
 }
 
 export const fetchSettings = () =>

@@ -20,7 +20,7 @@ export function Home() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
 
   useEffect(() => {
-    const tempGenres = Array.from(new Set(data?.map(media => media.details.genres.map((genre: any) => genre.name)).flat()))
+    let tempGenres = Array.from(new Set(data?.map(media => media.details.genres.map((genre: any) => genre.name)).flat()))
     setGenres(tempGenres);
     setSelectedGenres(tempGenres);
   }, [data]);
