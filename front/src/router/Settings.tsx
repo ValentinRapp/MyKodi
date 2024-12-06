@@ -68,11 +68,74 @@ function ThemeButton(props: { theme: string, onClick: (theme: string) => void })
   )
 }
 
-export function Settings() {
+function Sources(props: { sources: Source[], setSources: (sources: Source[]) => void }) {
+  const addSource = async (path: string) => {
 
-  const { data, isError } = useQuery<Source[]>('settings', fetchSettings);
+    const paths = props.sources.map(s => s.path);
+    const newPaths = Array.from(new Set(paths));
 
-  const [sources, setSources] = useState<Source[]>([]);
+    props.setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
+
+    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/update`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ paths: newPaths })
+    });
+
+    if (!res.ok) {
+      props.setSources(props.sources.filter(s => s.path !== path));
+      alert("Invalid path");
+    }
+  }
+
+  return (
+    <div className="flex justify-center">
+      <div>
+        <h2 className="text-4xl mb-2 flex justify-center" >Sources</h2>
+        <div className="flex">
+          <div>
+            <ul>
+              {props.sources.map(source => (
+                <li key={source.id} className="flex mb-2">
+                  <TextEdit
+                    value={source.path}
+                    onChange={e => props.setSources(props.sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
+                    saveCallback={addSource}
+                  />
+                  <button
+                    className="btn btn-square btn-error ml-2"
+                    onClick={() => {
+                      props.setSources(props.sources.filter(s => s.id !== source.id));
+                      fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ path: source.path })
+                      });
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              className="btn btn-square btn-primary w-full"
+              onClick={() => props.setSources([...props.sources, { path: "", id: uuidv4() }])}
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Themes() {
 
   const themes = useRef([
     "light",
@@ -109,6 +172,72 @@ export function Settings() {
     "sunset",
   ]);
 
+  const setTheme = (theme: string) => {
+    localStorage.setItem("theme", theme);
+    window.dispatchEvent(new Event('storage'))
+  }
+
+  return (
+    <div>
+      <div className="flex justify-center mt-6">
+        <div>
+          <h2 className="text-4xl mb-2 flex justify-center" >Theme</h2>
+          <div className=" rounded-box grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+            {themes.current.map(theme => (
+              <ThemeButton key={theme} theme={theme} onClick={(theme) => setTheme(theme)} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Endpoint() {
+
+  const [endpointType, setEndpointType] = useState<string>('');
+
+  useEffect(() => {
+    setEndpointType(localStorage.getItem('endpoint') || 'local');
+  })
+
+  const handleEndpointType = (type: string) => {
+    setEndpointType(type);
+    localStorage.setItem('endpoint', type);
+  }
+
+  return (
+    <div>
+      <div className="flex justify-center mt-6">
+        <div>
+          <h2 className="text-4xl mb-2 flex justify-center" >Endpoint</h2>
+
+          <div className="flex justify-center w-full p-2 bg-base-300 rounded-2xl">
+            <button
+              className={"btn mr-2" + (endpointType === 'local' ? " btn-primary" : "")}
+              onClick={() => handleEndpointType('local')}
+            >
+              Local
+            </button>
+            <button
+              onClick={() => handleEndpointType('distant')}
+              className={"btn" + (endpointType === 'distant' ? " btn-primary" : "")}
+            >
+              Distant
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function Settings() {
+
+  const { data, isError } = useQuery<Source[]>('settings', fetchSettings);
+  const [sources, setSources] = useState<Source[]>([]);
+
   useEffect(() => {
     setSources(data || []);
   }, [data]);
@@ -121,89 +250,13 @@ export function Settings() {
     )
   }
 
-  const addSource = async (path: string) => {
-
-    const paths = sources.map(s => s.path);
-    const newPaths = Array.from(new Set(paths));
-
-    setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
-
-    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/update`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ paths: newPaths })
-    });
-
-    if (!res.ok) {
-      setSources(sources.filter(s => s.path !== path));
-      alert("Invalid path");
-    }
-  }
-
-  const setTheme = (theme: string) => {
-    localStorage.setItem("theme", theme);
-    window.dispatchEvent(new Event('storage'))
-  }
-
   return (
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <div className="flex justify-center">
-          <div>
-            <h2 className="text-4xl mb-2 flex justify-center" >Sources</h2>
-            <div className="flex">
-              <div>
-                <ul>
-                  {sources.map(source => (
-                    <li key={source.id} className="flex mb-2">
-                      <TextEdit
-                        value={source.path}
-                        onChange={e => setSources(sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
-                        saveCallback={addSource}
-                      />
-                      <button
-                        className="btn btn-square btn-error ml-2"
-                        onClick={() => {
-                          setSources(sources.filter(s => s.id !== source.id));
-                          fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({ path: source.path })
-                          });
-                        }}
-                      >
-                        🗑️
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  className="btn btn-square btn-primary w-full"
-                  onClick={() => setSources([...sources, { path: "", id: uuidv4() }])}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="flex justify-center mt-6">
-            <div>
-              <h2 className="text-4xl mb-2 flex justify-center" >Theme</h2>
-              <div className=" rounded-box grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                {themes.current.map(theme => (
-                  <ThemeButton key={theme} theme={theme} onClick={(theme) => setTheme(theme)} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <Sources sources={sources} setSources={setSources} />
+        <Themes />
+        <Endpoint />
       </div>
     </div>
   );
