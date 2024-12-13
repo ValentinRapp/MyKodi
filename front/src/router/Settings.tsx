@@ -9,14 +9,18 @@ type Source = {
 }
 
 function TextEdit(props: {
+  type?: string;
+  readOnly?: boolean
+  placeholder: string
   value: string,
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  saveCallback: (value: string) => void
+  saveCallback: (value: string) => void,
 }) {
   return (
     <input
-      type="text"
-      placeholder="Write Path"
+      disabled={props.readOnly}
+      type={!props.type ? "text" : props.type}
+      placeholder={props.placeholder}
       value={props.value}
       onChange={e => props.onChange(e)}
       onBlur={() => props.saveCallback(props.value)}
@@ -25,7 +29,7 @@ function TextEdit(props: {
           props.saveCallback(props.value);
         }
       }}
-      className="input input-bordered w-full max-w-xs"
+      className={`input input-bordered w-full max-w-xs`}
     />
   )
 }
@@ -100,6 +104,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
               {props.sources.map(source => (
                 <li key={source.id} className="flex mb-2">
                   <TextEdit
+                    placeholder="Write Path"
                     value={source.path}
                     onChange={e => props.setSources(props.sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
                     saveCallback={addSource}
@@ -196,19 +201,47 @@ function Themes() {
 function Endpoint() {
 
   const [endpointType, setEndpointType] = useState<string>('');
+  const [port, setPort] = useState('5000');
+  const [address, setAddress] = useState('localhost');
+  const [endpoint, setEndpoint] = useState<{ address: string, port: string }>({ port, address });
 
   useEffect(() => {
     setEndpointType(localStorage.getItem('endpoint') || 'local');
-  })
+
+    const tempEndpoint = localStorage.getItem('endpoint_address');
+    if (tempEndpoint) {
+      try {
+        const parsedEndpoint = JSON.parse(tempEndpoint);
+        setEndpoint(parsedEndpoint);
+        setPort(parsedEndpoint.port);
+        setAddress(parsedEndpoint.address);
+      } catch (error) {
+        console.error("Error parsing endpoint:", error);
+        localStorage.setItem('endpoint_address', JSON.stringify({ port, address }));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (endpoint.address !== 'localhost' || endpoint.port !== '5000') {
+      localStorage.setItem('endpoint_address', JSON.stringify(endpoint));
+    } else {
+      localStorage.removeItem('endpoint_address');
+    }
+  }, [endpoint]);
 
   const handleEndpointType = (type: string) => {
     setEndpointType(type);
     localStorage.setItem('endpoint', type);
+    if (type === 'local') {
+      setAddress('localhost');
+      setEndpoint(current => ({ address: 'localhost', port: current.port }));
+    }
   }
 
   return (
-    <div>
-      <div className="flex justify-center mt-6">
+    <div className="my-6">
+      <div className="flex justify-center">
         <div>
           <h2 className="text-4xl mb-2 flex justify-center" >Endpoint</h2>
 
@@ -226,9 +259,29 @@ function Endpoint() {
               Distant
             </button>
           </div>
-
         </div>
       </div>
+      <div className="flex justify-center mt-2">
+        <div className="w-1/12 mr-2">
+          <TextEdit
+            placeholder="Address"
+            readOnly={endpointType === 'local'}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            saveCallback={(value) => setEndpoint(current => ({ address: value, port: current.port }))}
+          />
+        </div>
+        <div className="w-1/12">
+          <TextEdit
+            type="number"
+            placeholder="Port"
+            value={port}
+            onChange={(e) => setPort(e.target.value)}
+            saveCallback={(value) => setEndpoint(current => ({ address: current.address, port: value }))}
+          />
+        </div>
+      </div>
+      {/* <p>{JSON.stringify(endpoint)}</p> */}
     </div>
   )
 }
@@ -254,9 +307,9 @@ export function Settings() {
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
+        <Endpoint />
         <Sources sources={sources} setSources={setSources} />
         <Themes />
-        <Endpoint />
       </div>
     </div>
   );
