@@ -2,11 +2,21 @@ import Fastify from 'fastify'
 import { readdir } from "node:fs/promises";
 import cors from '@fastify/cors';
 
+let PORT = parseInt(process.argv.slice(2)[0]);
+
+if (isNaN(PORT)) {
+    PORT = 2425;
+}
+
 const fastify = Fastify({});
 
 await fastify.register(cors, {
     origin: '*',
     methods: ['GET', 'POST']
+});
+
+fastify.get('/ping', (req, rep) => {
+    return { message: 'pong' };
 });
 
 fastify.get('/paths', async (req, rep): Promise<Paths> => {
@@ -99,9 +109,9 @@ fastify.get('/medias', async (req, rep): Promise<{ medias: Media[] } | null> => 
 
 fastify.get('/medias/:name', async (req, rep) => {
     const { name } = req.params as { name: string };
-    
+
     const sources: string[] = (await Bun.file("save.json").json() as Paths).paths;
-    
+
     const paths = sources.map(source => `${source}/${name}`)
 
     const validPaths = [];
@@ -134,8 +144,8 @@ fastify.get('/', async (request, reply) => {
 });
 
 try {
-    console.log('Server is running at http://localhost:3000/');
-    await fastify.listen({ port: 3000 });
+    console.log(`Server is running on port ${PORT}`);
+    await fastify.listen({ port: PORT });
 } catch (err) {
     fastify.log.error(err);
     process.exit(1);

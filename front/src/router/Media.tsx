@@ -5,6 +5,7 @@ import { StarRating } from "../components/star_rating";
 import { useQuery } from "react-query";
 import { queryClient } from "../main";
 import { fetchMovie, getMediaInfo } from "../lib/fetchData";
+import { getEndpoint } from "../lib/getEndpoint";
 
 function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }) {
   return (
@@ -100,7 +101,7 @@ export function Media() {
   const handleFavoriting = () => {
     setFavorited(curr => !curr);
     let action = favorited ? 'remove' : 'add';
-    fetch(`${import.meta.env.VITE_SERVER_URL as string}/favorites/${action}`, {
+    fetch(`${getEndpoint()}/favorites/${action}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

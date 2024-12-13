@@ -2,11 +2,23 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { fetchSettings } from "../lib/fetchData";
+import { getEndpoint } from "../lib/getEndpoint";
 
 type Source = {
   path: string;
   id: string;
 }
+
+const pingEndpoint = async (endpoint: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`${endpoint}/ping`, {
+      method: 'GET'
+    });
+    return response.status === 200;
+  } catch (e) {
+    return false;
+  }
+};
 
 function TextEdit(props: {
   type?: string;
@@ -73,6 +85,13 @@ function ThemeButton(props: { theme: string, onClick: (theme: string) => void })
 }
 
 function Sources(props: { sources: Source[], setSources: (sources: Source[]) => void }) {
+
+  useEffect(() => {
+    if (props.sources.length === 0) {
+      props.setSources([{ path: "", id: uuidv4() }]);
+    }
+  }, [props.sources]);
+
   const addSource = async (path: string) => {
 
     const paths = props.sources.map(s => s.path);
@@ -80,7 +99,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
 
     props.setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
 
-    const res = await fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/update`, {
+    const res = await fetch(`${getEndpoint()}/paths/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -113,7 +132,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
                     className="btn btn-square btn-error ml-2"
                     onClick={() => {
                       props.setSources(props.sources.filter(s => s.id !== source.id));
-                      fetch(`${import.meta.env.VITE_SERVER_URL as string}/paths/remove`, {
+                      fetch(`${getEndpoint()}/paths/remove`, {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json"
@@ -184,7 +203,7 @@ function Themes() {
 
   return (
     <div>
-      <div className="flex justify-center mt-6">
+      <div className="flex justify-center my-6">
         <div>
           <h2 className="text-4xl mb-2 flex justify-center" >Theme</h2>
           <div className=" rounded-box grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -198,10 +217,10 @@ function Themes() {
   )
 }
 
-function Endpoint() {
+function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: boolean) => void }) {
 
   const [endpointType, setEndpointType] = useState<string>('');
-  const [port, setPort] = useState('5000');
+  const [port, setPort] = useState('2425');
   const [address, setAddress] = useState('localhost');
   const [endpoint, setEndpoint] = useState<{ address: string, port: string }>({ port, address });
 
@@ -223,11 +242,13 @@ function Endpoint() {
   }, []);
 
   useEffect(() => {
-    if (endpoint.address !== 'localhost' || endpoint.port !== '5000') {
+    if (endpoint.address !== 'localhost' || endpoint.port !== '2425') {
       localStorage.setItem('endpoint_address', JSON.stringify(endpoint));
     } else {
       localStorage.removeItem('endpoint_address');
     }
+    const handleEndpointStatus = async () => props.setEndpointStatus(await pingEndpoint(getEndpoint()));
+    handleEndpointStatus();
   }, [endpoint]);
 
   const handleEndpointType = (type: string) => {
@@ -262,7 +283,7 @@ function Endpoint() {
         </div>
       </div>
       <div className="flex justify-center mt-2">
-        <div className="w-1/12 mr-2">
+        <div className="w-28 mr-2">
           <TextEdit
             placeholder="Address"
             readOnly={endpointType === 'local'}
@@ -271,7 +292,7 @@ function Endpoint() {
             saveCallback={(value) => setEndpoint(current => ({ address: value, port: current.port }))}
           />
         </div>
-        <div className="w-1/12">
+        <div className="w-20">
           <TextEdit
             type="number"
             placeholder="Port"
@@ -281,34 +302,27 @@ function Endpoint() {
           />
         </div>
       </div>
-      {/* <p>{JSON.stringify(endpoint)}</p> */}
+      {!props.endpointStatus && <p className="flex justify-center text-red-500 mt-1">Failed to reach endpoint</p>}
     </div>
   )
 }
 
 export function Settings() {
 
-  const { data, isError } = useQuery<Source[]>('settings', fetchSettings);
+  const { data } = useQuery<Source[]>('settings', fetchSettings);
+  const [endpointStatus, setEndpointStatus] = useState(true);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
     setSources(data || []);
   }, [data]);
 
-  if (isError) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p className="text-2xl text-red-500">An error occurred</p>
-      </div>
-    )
-  }
-
   return (
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <Endpoint />
-        <Sources sources={sources} setSources={setSources} />
+        <Endpoint endpointStatus={endpointStatus} setEndpointStatus={setEndpointStatus} />
+        {endpointStatus && <Sources sources={sources} setSources={setSources} />}
         <Themes />
       </div>
     </div>

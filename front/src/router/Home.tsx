@@ -38,7 +38,7 @@ export function Home() {
   if (isError) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <p className="text-2xl text-red-500">An error occurred</p>
+        <p className="text-2xl">Failed to reach endpoint, head to settings and set endpoint</p>
       </div>
     )
   }
