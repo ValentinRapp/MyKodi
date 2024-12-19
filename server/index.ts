@@ -3,6 +3,7 @@ import { readdir } from "node:fs/promises";
 import cors from '@fastify/cors';
 
 let PORT = parseInt(process.argv.slice(2)[0]);
+let PASSWORD = process.argv.slice(2)[1] || '';
 
 if (isNaN(PORT)) {
     PORT = 2425;
@@ -13,6 +14,28 @@ const fastify = Fastify({});
 await fastify.register(cors, {
     origin: '*',
     methods: ['GET', 'POST']
+});
+
+fastify.addHook('onRequest', async (req, rep) => {
+    if (['/ping', '/check_passwd'].includes(req.url)) {
+        return;
+    }
+
+    const { authorization } = req.headers;
+
+    if (!authorization ||
+        ((authorization.split(' ').filter((element, index) => index).join(' ') || '') !== PASSWORD)) {
+        return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }))
+    }
+});
+
+fastify.post<{ Body: { passwd: string | undefined } }>('/check_passwd', (req, rep) => {
+    const { passwd } = req.body;
+
+    if (passwd === undefined || passwd !== PASSWORD) {
+        return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }))
+    }
+    return { message: "Authorized" };
 });
 
 fastify.get('/ping', (req, rep) => {
