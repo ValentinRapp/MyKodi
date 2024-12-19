@@ -6,6 +6,7 @@ import { useQuery } from "react-query";
 import { queryClient } from "../main";
 import { fetchMovie, getMediaInfo } from "../lib/fetchData";
 import { getEndpoint } from "../lib/getEndpoint";
+import { mfetch } from "../lib/mfetch";
 
 function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }) {
   return (
@@ -101,7 +102,7 @@ export function Media() {
   const handleFavoriting = () => {
     setFavorited(curr => !curr);
     let action = favorited ? 'remove' : 'add';
-    fetch(`${getEndpoint()}/favorites/${action}`, {
+    mfetch(`/favorites/${action}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

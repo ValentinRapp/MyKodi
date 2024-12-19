@@ -3,6 +3,7 @@ import { useQuery } from "react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { fetchSettings } from "../lib/fetchData";
 import { getEndpoint } from "../lib/getEndpoint";
+import { mfetch } from "../lib/mfetch";
 
 type Source = {
   path: string;
@@ -19,6 +20,22 @@ const pingEndpoint = async (endpoint: string): Promise<boolean> => {
     return false;
   }
 };
+
+const isPasswordCorrect = async (password: string): Promise<boolean> => {
+  try {
+    return await fetch(`${getEndpoint()}/check_passwd`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ passwd: password })
+    })
+      .then(res => res.json())
+      .then(data => data.message === "Authorized");
+  } catch (e) {
+    return false;
+  }
+}
 
 function TextEdit(props: {
   type?: string;
@@ -99,7 +116,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
 
     props.setSources(newPaths.map((path: string) => ({ path, id: uuidv4() })));
 
-    const res = await fetch(`${getEndpoint()}/paths/update`, {
+    const res = await mfetch('/paths/update', {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -132,7 +149,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
                     className="btn btn-square btn-error ml-2"
                     onClick={() => {
                       props.setSources(props.sources.filter(s => s.id !== source.id));
-                      fetch(`${getEndpoint()}/paths/remove`, {
+                      mfetch('/paths/remove', {
                         method: "POST",
                         headers: {
                           "Content-Type": "application/json"
@@ -222,6 +239,7 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
   const [endpointType, setEndpointType] = useState<string>('');
   const [port, setPort] = useState('2425');
   const [address, setAddress] = useState('localhost');
+  const [password, setPassword] = useState(localStorage.getItem('password') || '');
   const [endpoint, setEndpoint] = useState<{ address: string, port: string }>({ port, address });
 
   useEffect(() => {
@@ -241,13 +259,14 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
     }
   }, []);
 
+  const handleEndpointStatus = async () => props.setEndpointStatus((await pingEndpoint(getEndpoint())) && (await isPasswordCorrect(password)));
+
   useEffect(() => {
     if (endpoint.address !== 'localhost' || endpoint.port !== '2425') {
       localStorage.setItem('endpoint_address', JSON.stringify(endpoint));
     } else {
       localStorage.removeItem('endpoint_address');
     }
-    const handleEndpointStatus = async () => props.setEndpointStatus(await pingEndpoint(getEndpoint()));
     handleEndpointStatus();
   }, [endpoint]);
 
@@ -292,7 +311,7 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
             saveCallback={(value) => setEndpoint(current => ({ address: value, port: current.port }))}
           />
         </div>
-        <div className="w-20">
+        <div className="w-24">
           <TextEdit
             type="number"
             placeholder="Port"
@@ -301,6 +320,19 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
             saveCallback={(value) => setEndpoint(current => ({ address: current.address, port: value }))}
           />
         </div>
+
+      </div>
+      <div className="mt-2 w-52 mx-auto">
+        <TextEdit
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          saveCallback={(password) => {
+            localStorage.setItem('password', password);
+            handleEndpointStatus();
+          }}
+        />
       </div>
       {!props.endpointStatus && <p className="flex justify-center text-red-500 mt-1">Failed to reach endpoint</p>}
     </div>
