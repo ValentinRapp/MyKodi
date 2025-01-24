@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { getTrailer } from "../lib/getMovie";
 import { StarRating } from "../components/star_rating";
@@ -129,7 +129,7 @@ export function Media() {
   return (
     <div className="m-4">
       <div className="flex items-center justify-center relative mb-4">
-        <NavLink className="btn btn-circle btn-outline absolute left-0 ml-2" to="/">
+        <NavLink className="btn btn-circle btn-outline absolute left-0 ml-2" to={data.isOwned ? "/" : "/browse"}>
           {goBackSVG}
         </NavLink>
         <h1
@@ -157,17 +157,17 @@ export function Media() {
           <div className="flex">
             <NavLink
               to={`/media/${mediaName}/play`}
-              className="btn btn-primary"
+              className={`btn btn-primary ${data.isOwned ? '' : 'btn-disabled'}`}
               onMouseOver={() => queryClient.prefetchQuery(`play-${mediaName}`, () => fetchMovie(mediaName as string))}
             >
               {playButtonSVG}
             </NavLink>
-            <button
+            {data.isOwned && <button
               className="btn btn-neutral ml-2"
               onClick={handleFavoriting}
             >
               {favorited ? fullStar : emptyStar}
-            </button>
+            </button>}
             <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
             <button
               className="btn btn-neutral ml-2"

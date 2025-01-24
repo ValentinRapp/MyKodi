@@ -1,11 +1,20 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { queryClient } from "../main";
 import { fetchHome, fetchSettings } from "../lib/fetchData";
+import { useRef } from "react";
 
 export function Sidebar() {
+  const drawerCheckbox = useRef<HTMLInputElement>(null);
+
+  const closeDrawer = () => {
+    if (window.innerWidth < 1024 && drawerCheckbox.current) {
+      drawerCheckbox.current.checked = false;
+    }
+  };
+
   return (
     <div className="drawer lg:drawer-open">
-      <input id="drawer" type="checkbox" className="drawer-toggle" />
+      <input id="drawer" type="checkbox" className="drawer-toggle" ref={drawerCheckbox} />
       <div className="drawer-content">
         <Outlet />
         <label htmlFor="drawer" className="btn btn-square btn-ghost absolute left-2 top-2 lg:hidden">
@@ -33,9 +42,10 @@ export function Sidebar() {
             <NavLink
               to="/"
               end
+              onClick={closeDrawer}
               onMouseOver={() => queryClient.prefetchQuery('home', fetchHome)}
               className={({ isActive }) =>
-                isActive ? "bg-base-300" : ""
+                isActive ? "bg-base-300 hover:bg-base-300 focus:bg-base-300" : ""
               }
             >
               Home
@@ -43,10 +53,23 @@ export function Sidebar() {
           </li>
           <li>
             <NavLink
+              to="/browse"
+              end
+              onClick={closeDrawer}
+              className={({ isActive }) =>
+                isActive ? "bg-base-300 hover:bg-base-300 focus:bg-base-300" : ""
+              }
+            >
+              Browse
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="/settings"
+              onClick={closeDrawer}
               onMouseOver={() => queryClient.prefetchQuery('settings', fetchSettings)}
               className={({ isActive }) =>
-                isActive ? "bg-base-300" : ""
+                isActive ? "bg-base-300 hover:bg-base-300 focus:bg-base-300" : ""
               }
             >
               Settings

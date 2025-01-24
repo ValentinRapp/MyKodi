@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { getMovie } from "../lib/getMovie";
 import { queryClient } from "../main";
 import { useQuery } from "react-query";
-import { fetchHome } from "../lib/fetchData";
+import { fetchHome, getMediaInfo } from "../lib/fetchData";
 import { useEffect, useState } from "react";
 import { GenresDropdown } from "../components/genres_dropdown";
 
@@ -44,7 +44,7 @@ export function Home() {
   }
 
   const prefetchMediaDetails = (mediaName: string) => {
-    queryClient.prefetchQuery(`media-${mediaName}`, () => getMovie({ name: mediaName }));
+    queryClient.prefetchQuery(`media-${mediaName}`, () => getMediaInfo(mediaName));
   }
 
   return (

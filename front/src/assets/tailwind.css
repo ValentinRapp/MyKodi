@@ -10,5 +10,5 @@
 * {
     -webkit-user-select: none;
     -webkit-user-drag: none;
-    cursor: default !important;
+    /* cursor: default !important; */
 }

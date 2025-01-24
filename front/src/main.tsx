@@ -8,6 +8,7 @@ import { Settings } from "./router/Settings";
 import { Media } from "./router/Media";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Player } from "./router/Player";
+import { Browse } from "./router/Browse";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />
+      },
+      {
+        path: "/browse",
+        element: <Browse />
       },
       {
         path: "/settings",

@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 type Media = {
     name: string;
     source: string;
@@ -33,4 +35,24 @@ export const getTrailer = async (media: Partial<Media>): Promise<string> => {
     const trailerData = await fetch(`https://api.themoviedb.org/3/movie/${movieID}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json());
 
     return trailerData.results[0].key;
+}
+
+export const getMovies = async (query: string): Promise<Media[]> => {
+    const searchRes = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${import.meta.env.VITE_TMDB_API_KEY}&query=${query}`);
+    const searchResults = (await searchRes.json()).results;
+
+    const IDs = searchResults.map((result: any) => result.id);
+
+    const moviesDetails = await Promise.all(IDs.map(async (id: number) =>
+        await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json())
+    ));
+
+    return moviesDetails.map((movie: any) => {
+        return {
+            name: movie.title as string,
+            source: "",
+            id: uuidv4(),
+            details: movie
+        }
+    });
 }

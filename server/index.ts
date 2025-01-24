@@ -17,7 +17,7 @@ await fastify.register(cors, {
 });
 
 fastify.addHook('onRequest', async (req, rep) => {
-    if (['/ping', '/check_passwd'].includes(req.url)) {
+    if (['/ping', '/check_passwd', '/'].includes(req.url)) {
         return;
     }
 
@@ -162,13 +162,13 @@ fastify.get('/medias/:name', async (req, rep) => {
     }
 });
 
-fastify.get('/', async (request, reply) => {
+fastify.get('/', async (req, rep) => {
     return { hello: 'world' };
 });
 
 try {
     console.log(`Server is running on port ${PORT}`);
-    await fastify.listen({ port: PORT });
+    await fastify.listen({ port: PORT, host: '0.0.0.0' });
 } catch (err) {
     fastify.log.error(err);
     process.exit(1);

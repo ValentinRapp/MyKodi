@@ -31,7 +31,6 @@ export const fetchSettings = () =>
     .then(data => data.paths.map((path: string) => ({ path, id: uuidv4() })));
 
 
-
 export const fetchMovie = async (filename: string) => {
   const link = await mfetch(`/medias/${filename}`)
     .then(res => {
@@ -55,5 +54,8 @@ export const getMediaInfo = async (filename: string) => {
   const favorite = await mfetch('/favorites')
     .then(res => res.json())
     .then(data => data.favorites.includes(filename));
-  return { ...movieDetails, favorite };
+  const isOwned = await mfetch('/medias')
+    .then(res => res.json())
+    .then(data => data.medias.some((media: any) => media.name === filename));
+  return { ...movieDetails, favorite, isOwned };
 }
