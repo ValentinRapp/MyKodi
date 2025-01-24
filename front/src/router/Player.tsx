@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import { NavLink, useParams } from "react-router-dom";
 import { fetchMovie } from "../lib/fetchData";
+import { getEndpoint } from "../lib/getEndpoint";
 
 export function Player() {
   const { mediaName } = useParams();
@@ -52,7 +53,7 @@ export function Player() {
         </h1>
       </div>
       <div className="flex justify-center">
-        <video src={data?.link as string} controls width="80%" />
+        <video src={`${getEndpoint()}/medias/${mediaName}`} controls autoPlay width="80%" />
       </div>
     </div>
   )

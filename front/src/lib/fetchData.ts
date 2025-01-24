@@ -32,21 +32,8 @@ export const fetchSettings = () =>
 
 
 export const fetchMovie = async (filename: string) => {
-  const link = await mfetch(`/medias/${filename}`)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error("Failed to fetch video");
-      }
-      return res.blob();
-    })
-    .then(blob => {
-      return URL.createObjectURL(blob);
-    })
-    .catch(error => {
-      console.error("Error fetching video:", error);
-    });
   const title = (await getMovie({ name: filename })).original_title;
-  return { link, title };
+  return { title };
 }
 
 export const getMediaInfo = async (filename: string) => {

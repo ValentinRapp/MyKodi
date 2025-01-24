@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import { readdir } from "node:fs/promises";
+import fs from 'fs';
 import cors from '@fastify/cors';
 
 let PORT = parseInt(process.argv.slice(2)[0]);
@@ -16,8 +17,8 @@ await fastify.register(cors, {
     methods: ['GET', 'POST']
 });
 
-fastify.addHook('onRequest', async (req, rep) => {
-    if (['/ping', '/check_passwd', '/'].includes(req.url)) {
+fastify.addHook('onRequest', async (req, rep) => {    
+    if (['/ping', '/check_passwd', '/'].includes(req.url) || req.url.startsWith('/medias/')) {
         return;
     }
 
@@ -152,13 +153,34 @@ fastify.get('/medias/:name', async (req, rep) => {
     const path = validPaths[0];
 
     try {
-        const file = await Bun.file(path).arrayBuffer();
-        rep.header('Content-Type', 'application/octet-stream');
-        rep.header('Content-Disposition', `attachment; filename="${name}"`);
-        return Buffer.from(file);
+        const fileSize = Bun.file(path).size;
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace(/bytes=/, '').split('-');
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] 
+              ? parseInt(parts[1], 10)
+              : fileSize - 1;
+      
+            const chunkSize = end - start + 1;
+            
+            rep.status(206)
+              .header('Content-Range', `bytes ${start}-${end}/${fileSize}`)
+              .header('Accept-Ranges', 'bytes')
+              .header('Content-Length', chunkSize)
+              .header('Content-Type', 'video/mp4');
+      
+            return fs.createReadStream(path, { start, end });
+        } else {
+            rep.header('Content-Length', fileSize)
+            .header('Content-Type', 'video/mp4');
+       
+            return fs.createReadStream(path);
+        }
     } catch (err) {
         rep.code(404);
-        return { error: "File not found" };
+        return { error: "video not found" };
     }
 });
 
