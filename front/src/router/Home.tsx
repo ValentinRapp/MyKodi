@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { getMovie } from "../lib/getMovie";
 import { queryClient } from "../main";
 import { useQuery } from "react-query";
 import { fetchHome, getMediaInfo } from "../lib/fetchData";
@@ -72,7 +71,7 @@ export function Home() {
                   src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${media.details.poster_path}`}
                   alt={`${media.details.original_title} poster`}
                   className="rounded-lg"
-                  width={200}
+                  width={183}
                 />
               </div>
             </div>

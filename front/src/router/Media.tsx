@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { getTrailer } from "../lib/getMovie";
 import { StarRating } from "../components/star_rating";
