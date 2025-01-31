@@ -13,7 +13,7 @@ export const fetchHome = async () => {
   const favorites = await mfetch('/favorites')
     .then(res => res.json())
     .then(data => data.favorites);
-  
+
   return data.medias.map((media: Partial<Media>) => {
     favorites.includes(media.name) ? details[data.medias.indexOf(media)].genres.push({ name: "Favorited" }) : null;
     return {
@@ -38,11 +38,15 @@ export const fetchMovie = async (filename: string) => {
 
 export const getMediaInfo = async (filename: string) => {
   const movieDetails = await getMovie({ name: filename });
-  const favorite = await mfetch('/favorites')
-    .then(res => res.json())
-    .then(data => data.favorites.includes(filename));
-  const isOwned = await mfetch('/medias')
-    .then(res => res.json())
-    .then(data => data.medias.some((media: any) => media.name === filename));
-  return { ...movieDetails, favorite, isOwned };
+  try {
+    const favorite = await mfetch('/favorites')
+      .then(res => res.json())
+      .then(data => data.favorites.includes(filename));
+    const isOwned = await mfetch('/medias')
+      .then(res => res.json())
+      .then(data => data.medias.some((media: any) => media.name === filename));
+    return { ...movieDetails, favorite, isOwned };
+  } catch (e) {
+    return { ...movieDetails, favorite: false, isOwned: false };
+  }
 }

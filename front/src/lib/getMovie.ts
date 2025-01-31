@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { isNumber } from './isNumber';
 
 type Media = {
     name: string;
@@ -14,7 +15,11 @@ export const getMovie = async (media: Partial<Media>): Promise<any> => {
     try {
         movieID = (await searchRes.json()).results[0].id;
     } catch (e) {
-        return null;
+        movieID = parseInt(media.name?.split('.')[0] || '808');
+    }
+
+    if (isNumber(media.name?.split('.')[0] || "hello")) {
+        movieID = parseInt(media.name?.split('.')[0] || '808');
     }
 
     const movieData = await fetch(`https://api.themoviedb.org/3/movie/${movieID}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json());

@@ -169,6 +169,14 @@ export function Media() {
             >
               {favorited ? fullStar : emptyStar}
             </button>}
+            {!data.isOwned && <button
+              className="btn btn-neutral w-full lg:w-auto"
+              onClick={() => {
+                navigator.clipboard.writeText(mediaName || 'ID not found');
+              }}
+            >
+              Copy ID
+            </button>}
             <button
               className="btn btn-neutral w-full lg:w-auto"
               onClick={async () => {

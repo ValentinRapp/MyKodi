@@ -59,7 +59,7 @@ export function Browse() {
               key={media.id}
               className="card"
               onMouseOver={() => prefetchMediaDetails(media.name)}
-              onClick={() => navigate(`/media/${media.name}`)}
+              onClick={() => navigate(`/media/${media.details.id}`)}
             >
               <div className="m-4 transition-transform duration-300 transform hover:scale-110">
                 <img
