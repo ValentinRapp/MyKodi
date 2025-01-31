@@ -21,10 +21,10 @@ function TrailerModal(props: { trailerID: string, handleCloseModal: () => void }
           ✕
         </button>
         <h3 className="font-bold text-lg">Trailer</h3>
-        <div className="py-4">
+        <div className="py-4 aspect-video">
           <iframe
-            width="854"
-            height="480"
+            width="100%"
+            height="100%"
             src={`https://www.youtube.com/embed/${props.trailerID}`}
             title="YouTube video player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -47,7 +47,7 @@ export function Media() {
   useEffect(() => {
     try {
       setFavorited(data.favorite);
-    } catch (e) {}
+    } catch (e) { }
   }, [data]);
 
   const goBackSVG = (
@@ -108,7 +108,7 @@ export function Media() {
       },
       body: JSON.stringify({ name: mediaName })
     });
-    }
+  }
 
   if (isLoading) {
     return (
@@ -133,44 +133,44 @@ export function Media() {
           {goBackSVG}
         </NavLink>
         <h1
-          className="text-6xl mt-2"
+          className="text-4xl lg:text-6xl mt-2 text-center"
           style={{ fontFamily: "Helvetica-rounded-bold" }}
         >
           {data.original_title}
         </h1>
       </div>
-      <div className="flex grid grid-cols-2">
-        <div className="flex justify-center align-center">
+      <div className="flex grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="flex justify-center">
           <img
             src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${data.poster_path}`}
             alt={`${data.original_title} poster`}
-            className="rounded-lg"
-            width={500}
+            className="rounded-xl w-full max-w-[400px] lg:max-w-[500px] h-auto"
           />
         </div>
-        <div className="m-6 text-2xl">
-          <p>{data.release_date.split('-')[0]} - {data.genres.map((genre: any) => genre.name).join(", ")}</p>
-          <StarRating note={data.vote_average} maxNote={10} nbStars={5} />
+        <div className="m-2 lg:m-6 text-xl lg:text-2lg">
+          <p className="text-center lg:text-left">{data.release_date.split('-')[0]} - {data.genres.map((genre: any) => genre.name).join(", ")}</p>
+          <div className="flex justify-center lg:justify-start">
+            <StarRating note={data.vote_average} maxNote={10} nbStars={5} />
+          </div>
           <br />
-          <p>{data.overview}</p>
+          <p className="px-2 lg:px-0">{data.overview}</p>
           <br />
-          <div className="flex">
+          <div className="flex flex-col lg:flex-row gap-2 items-center">
             <NavLink
               to={`/media/${mediaName}/play`}
-              className={`btn btn-primary ${data.isOwned ? '' : 'btn-disabled'}`}
+              className={`btn btn-primary w-full lg:w-auto ${data.isOwned ? '' : 'btn-disabled'}`}
               onMouseOver={() => queryClient.prefetchQuery(`play-${mediaName}`, () => fetchMovie(mediaName as string))}
             >
               {playButtonSVG}
             </NavLink>
             {data.isOwned && <button
-              className="btn btn-neutral ml-2"
+              className="btn btn-neutral w-full lg:w-auto"
               onClick={handleFavoriting}
             >
               {favorited ? fullStar : emptyStar}
             </button>}
-            <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
             <button
-              className="btn btn-neutral ml-2"
+              className="btn btn-neutral w-full lg:w-auto"
               onClick={async () => {
                 (document.getElementById('trailer_modal') as HTMLDialogElement)?.showModal()
                 setTrailerID(await getTrailer({ name: mediaName }));
@@ -181,6 +181,7 @@ export function Media() {
           </div>
         </div>
       </div>
+      <TrailerModal trailerID={trailerID} handleCloseModal={handleCloseModal} />
     </div>
   )
 }
