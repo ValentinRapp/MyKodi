@@ -101,7 +101,7 @@ function ThemeButton(props: { theme: string, onClick: (theme: string) => void })
   )
 }
 
-function Sources(props: { sources: Source[], setSources: (sources: Source[]) => void }) {
+function Sources(props: { sources: Source[], setSources: (sources: Source[]) => void, isReadOnly: boolean }) {
 
   useEffect(() => {
     if (props.sources.length === 0) {
@@ -144,8 +144,9 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
                     value={source.path}
                     onChange={e => props.setSources(props.sources.map(s => s.id === source.id ? { ...s, path: e.target.value } : s))}
                     saveCallback={addSource}
+                    readOnly={props.isReadOnly}
                   />
-                  <button
+                  {!props.isReadOnly && <button
                     className="btn btn-square btn-error ml-2"
                     onClick={() => {
                       props.setSources(props.sources.filter(s => s.id !== source.id));
@@ -159,16 +160,16 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
                     }}
                   >
                     🗑️
-                  </button>
+                  </button>}
                 </li>
               ))}
             </ul>
-            <button
+            {!props.isReadOnly && <button
               className="btn btn-square btn-primary w-full"
               onClick={() => props.setSources([...props.sources, { path: "", id: uuidv4() }])}
             >
               +
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -234,7 +235,7 @@ function Themes() {
   )
 }
 
-function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: boolean) => void }) {
+function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: boolean) => void, setIsReadOnly: (status: boolean) => void }) {
 
   const [endpointType, setEndpointType] = useState<string>('');
   const [port, setPort] = useState('2425');
@@ -259,7 +260,10 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
     }
   }, []);
 
-  const handleEndpointStatus = async () => props.setEndpointStatus((await pingEndpoint(getEndpoint())) && (await isPasswordCorrect(password)));
+  const handleEndpointStatus = async () => {
+    props.setEndpointStatus((await pingEndpoint(getEndpoint())) && (await isPasswordCorrect(password)));
+    props.setIsReadOnly((await mfetch('/is_readonly')).ok);
+  }
 
   useEffect(() => {
     if (endpoint.address !== 'localhost' || endpoint.port !== '2425') {
@@ -343,6 +347,7 @@ export function Settings() {
 
   const { data } = useQuery<Source[]>('settings', fetchSettings);
   const [endpointStatus, setEndpointStatus] = useState(true);
+  const [isReadOnly, setIsReadOnly] = useState(false);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
@@ -353,8 +358,8 @@ export function Settings() {
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <Endpoint endpointStatus={endpointStatus} setEndpointStatus={setEndpointStatus} />
-        {endpointStatus && <Sources sources={sources} setSources={setSources} />}
+        <Endpoint endpointStatus={endpointStatus} setEndpointStatus={setEndpointStatus} setIsReadOnly={setIsReadOnly}/>
+        {endpointStatus && <Sources sources={sources} setSources={setSources} isReadOnly={isReadOnly}/>}
         <Themes />
       </div>
     </div>

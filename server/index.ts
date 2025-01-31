@@ -5,6 +5,7 @@ import cors from '@fastify/cors';
 
 let PORT = parseInt(process.argv.slice(2)[0]);
 let PASSWORD = process.argv.slice(2)[1] || '';
+let READONLY = process.argv.slice(2)[2] === 'readonly' || false;
 
 if (isNaN(PORT)) {
     PORT = 2425;
@@ -18,8 +19,12 @@ await fastify.register(cors, {
 });
 
 fastify.addHook('onRequest', async (req, rep) => {    
-    if (['/ping', '/check_passwd', '/'].includes(req.url) || req.url.startsWith('/medias/')) {
+    if (['/ping', '/check_passwd', '/is_readonly', '/'].includes(req.url) || req.url.startsWith('/medias/')) {
         return;
+    }
+
+    if (READONLY && req.method !== 'GET') {
+        return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }));
     }
 
     const { authorization } = req.headers;
@@ -41,6 +46,14 @@ fastify.post<{ Body: { passwd: string | undefined } }>('/check_passwd', (req, re
 
 fastify.get('/ping', (req, rep) => {
     return { message: 'pong' };
+});
+
+fastify.get('/is_readonly', (req, rep) => {
+    if (READONLY) {
+        return rep.code(200).send(JSON.stringify({ message: "Readonly" }));
+    } else {
+        return rep.code(403).send(JSON.stringify({ message: "Readwrite" }));
+    }
 });
 
 fastify.get('/paths', async (req, rep): Promise<Paths> => {
