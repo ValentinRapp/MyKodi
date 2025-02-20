@@ -11,6 +11,11 @@ if (isNaN(PORT)) {
     PORT = 2425;
 }
 
+if (PASSWORD === 'readonly') {
+    PASSWORD = '';
+    READONLY = true;
+}
+
 const fastify = Fastify({});
 
 await fastify.register(cors, {
@@ -19,14 +24,12 @@ await fastify.register(cors, {
 });
 
 fastify.addHook('onRequest', async (req, rep) => {    
-    if (['/ping', '/check_passwd', '/is_readonly', '/'].includes(req.url) || req.url.startsWith('/medias/')) {
+    if (['/ping', '/check_passwd', '/is_readonly', '/'].includes(req.url) || req.url.startsWith('/medias/') || PASSWORD === '') {
         return;
-    }
-
-    if (READONLY && req.method !== 'GET') {
+    } else if (READONLY && req.method !== 'GET') {
         return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }));
     }
-
+    
     const { authorization } = req.headers;
 
     if (!authorization ||
@@ -38,7 +41,9 @@ fastify.addHook('onRequest', async (req, rep) => {
 fastify.post<{ Body: { passwd: string | undefined } }>('/check_passwd', (req, rep) => {
     const { passwd } = req.body;
 
-    if (passwd === undefined || passwd !== PASSWORD) {
+    if (PASSWORD === '') {
+        return { message: "Authorized" };   
+    } else if (passwd !== PASSWORD) {
         return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }))
     }
     return { message: "Authorized" };
@@ -58,7 +63,7 @@ fastify.get('/is_readonly', (req, rep) => {
 
 fastify.get('/paths', async (req, rep): Promise<Paths> => {
     const paths = Bun.file("save.json");
-    return paths.json();
+    return { paths: (await paths.json()).paths };
 });
 
 fastify.post('/paths/add', async (req, rep): Promise<Paths | { error: string }> => {

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { fetchSettings } from "../lib/fetchData";
 import { getEndpoint } from "../lib/getEndpoint";
 import { mfetch } from "../lib/mfetch";
+import { toast } from "sonner";
 
 type Source = {
   path: string;
@@ -126,7 +127,7 @@ function Sources(props: { sources: Source[], setSources: (sources: Source[]) => 
 
     if (!res.ok) {
       props.setSources(props.sources.filter(s => s.path !== path));
-      alert("Invalid path");
+      toast.error("Invalid path");
     }
   }
 
@@ -235,12 +236,13 @@ function Themes() {
   )
 }
 
-function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: boolean) => void, setIsReadOnly: (status: boolean) => void }) {
+function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsReadOnly: (status: boolean) => void }) {
 
   const [endpointType, setEndpointType] = useState<string>('');
   const [port, setPort] = useState('2425');
   const [address, setAddress] = useState('localhost');
   const [password, setPassword] = useState(localStorage.getItem('password') || '');
+  const [needsPassword, setNeedsPassword] = useState(false);
   const [endpoint, setEndpoint] = useState<{ address: string, port: string }>({ port, address });
 
   useEffect(() => {
@@ -260,8 +262,21 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
     }
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      setNeedsPassword(await mfetch('/check_passwd', {
+        method: 'POST',
+        body: JSON.stringify({ passwd: '' }),
+      }).then(res => !res.ok));
+    })();
+  }, [endpoint]);
+
   const handleEndpointStatus = async () => {
-    props.setEndpointStatus((await pingEndpoint(getEndpoint())) && (await isPasswordCorrect(password)));
+    const endpointStatus = (await pingEndpoint(getEndpoint())) && (await isPasswordCorrect(password));
+    if (!endpointStatus) {
+      toast.error("Failed to reach endpoint");
+    }
+    props.setEndpointStatus(endpointStatus);
     props.setIsReadOnly((await mfetch('/is_readonly')).ok);
   }
 
@@ -326,7 +341,7 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
         </div>
 
       </div>
-      <div className="mt-2 w-52 mx-auto">
+      {needsPassword && <div className="mt-2 w-52 mx-auto">
         <TextEdit
           placeholder="Password"
           type="password"
@@ -337,8 +352,7 @@ function Endpoint(props: { endpointStatus: boolean, setEndpointStatus: (status: 
             handleEndpointStatus();
           }}
         />
-      </div>
-      {!props.endpointStatus && <p className="flex justify-center text-red-500 mt-1">Failed to reach endpoint</p>}
+      </div>}
     </div>
   )
 }
@@ -358,8 +372,8 @@ export function Settings() {
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <Endpoint endpointStatus={endpointStatus} setEndpointStatus={setEndpointStatus} setIsReadOnly={setIsReadOnly}/>
-        {endpointStatus && <Sources sources={sources} setSources={setSources} isReadOnly={isReadOnly}/>}
+        <Endpoint setEndpointStatus={setEndpointStatus} setIsReadOnly={setIsReadOnly} />
+        {endpointStatus && <Sources sources={sources} setSources={setSources} isReadOnly={isReadOnly} />}
         <Themes />
       </div>
     </div>

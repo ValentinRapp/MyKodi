@@ -7,15 +7,11 @@ export const mfetch = async (
 {
     const password = localStorage.getItem('password');
 
-    if (password) {
-        return fetch(`${getEndpoint()}${input}`, {
-            ...init,
-            headers: {
-                ...init?.headers,
-                Authorization: `sexe ${password}`
-            }
-        })
-    } else {
-        return new Response('Unauthorized', { status: 401 });
-    }
+    return fetch(`${getEndpoint()}${input}`, {
+        ...init,
+        headers: {
+            ...init?.headers,
+            Authorization: `sexe ${password || ''}`
+        }
+    })
 }

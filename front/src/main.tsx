@@ -9,6 +9,7 @@ import { Media } from "./router/Media";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Player } from "./router/Player";
 import { Browse } from "./router/Browse";
+import { Toaster } from "sonner";
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,7 @@ function ThemeHandler() {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ThemeHandler />
+    <Toaster richColors position="top-center"/>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
     </QueryClientProvider>
