@@ -38,7 +38,11 @@ const router = createBrowserRouter([
     path: "/media/:mediaName/play",
     element: <Player />
   }
-]);
+], {
+  future: {
+    v7_relativeSplatPath: true
+  }
+});
 
 export const queryClient = new QueryClient();
 
@@ -63,7 +67,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <ThemeHandler />
     <Toaster richColors position="top-center"/>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </QueryClientProvider>
   </React.StrictMode>,
 );
