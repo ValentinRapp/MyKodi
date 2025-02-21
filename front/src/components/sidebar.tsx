@@ -36,7 +36,7 @@ export function Sidebar() {
         <ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
           <div className="my-4 flex justify-center">
             <img src="/kodi-logo.webp" alt="logo" width={50} height={50} />
-            <h1 className="text-4xl mt-2" style={{ fontFamily: "Helvetica-rounded-bold" }} >EpiKodi</h1>
+            <h1 className="text-4xl mt-2" style={{ fontFamily: "Helvetica-rounded-bold" }} >MyKodi</h1>
           </div>
           <li>
             <NavLink

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "epikodi",
+  "productName": "mykodi",
   "version": "0.1.0",
-  "identifier": "com.epikodi.app",
+  "identifier": "com.mykodi.app",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "EpiKodi",
+        "title": "MyKodi",
         "width": 1280,
         "height": 720
       }
