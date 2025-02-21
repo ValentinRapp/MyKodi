@@ -237,17 +237,15 @@ function Themes() {
 }
 
 function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsReadOnly: (status: boolean) => void }) {
-
-  const [endpointType, setEndpointType] = useState<string>('');
   const [port, setPort] = useState('2425');
   const [address, setAddress] = useState('localhost');
   const [password, setPassword] = useState(localStorage.getItem('password') || '');
   const [needsPassword, setNeedsPassword] = useState(false);
   const [endpoint, setEndpoint] = useState<{ address: string, port: string }>({ port, address });
 
-  useEffect(() => {
-    setEndpointType(localStorage.getItem('endpoint') || 'local');
+  const endpointType = address === 'localhost' ? 'local' : 'distant';
 
+  useEffect(() => {
     const tempEndpoint = localStorage.getItem('endpoint_address');
     if (tempEndpoint) {
       try {
@@ -289,12 +287,15 @@ function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsRe
     handleEndpointStatus();
   }, [endpoint]);
 
-  const handleEndpointType = (type: string) => {
-    setEndpointType(type);
-    localStorage.setItem('endpoint', type);
+  const handleButtonClick = (type: 'local' | 'distant') => {
     if (type === 'local') {
-      setAddress('localhost');
-      setEndpoint(current => ({ address: 'localhost', port: current.port }));
+      const newAddress = 'localhost';
+      setAddress(newAddress);
+      setEndpoint(current => ({ ...current, address: newAddress }));
+    } else {
+      const newAddress = '';
+      setAddress(newAddress);
+      setEndpoint(current => ({ ...current, address: newAddress }));
     }
   }
 
@@ -302,18 +303,18 @@ function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsRe
     <div className="my-6">
       <div className="flex justify-center">
         <div>
-          <h2 className="text-4xl mb-2 flex justify-center" >Endpoint</h2>
+          <h2 className="text-4xl mb-2 flex justify-center">Endpoint</h2>
 
           <div className="flex justify-center w-full p-2 bg-base-300 rounded-2xl">
             <button
-              className={"btn mr-2" + (endpointType === 'local' ? " btn-primary" : "")}
-              onClick={() => handleEndpointType('local')}
+              className={`btn mr-2 ${endpointType === 'local' ? 'btn-primary' : ''}`}
+              onClick={() => handleButtonClick('local')}
             >
               Local
             </button>
             <button
-              onClick={() => handleEndpointType('distant')}
-              className={"btn" + (endpointType === 'distant' ? " btn-primary" : "")}
+              className={`btn ${endpointType === 'distant' ? 'btn-primary' : ''}`}
+              onClick={() => handleButtonClick('distant')}
             >
               Distant
             </button>
@@ -339,7 +340,6 @@ function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsRe
             saveCallback={(value) => setEndpoint(current => ({ address: current.address, port: value }))}
           />
         </div>
-
       </div>
       {needsPassword && <div className="mt-2 w-52 mx-auto">
         <TextEdit
@@ -354,7 +354,7 @@ function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsRe
         />
       </div>}
     </div>
-  )
+  );
 }
 
 export function Settings() {
