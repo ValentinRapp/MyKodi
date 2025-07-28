@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 import { v4 as uuidv4 } from 'uuid';
 import { fetchSettings } from "../lib/fetchData";
-import { getEndpoint } from "../lib/getEndpoint";
+// import { getEndpoint } from "../lib/getEndpoint";
 import { mfetch } from "../lib/mfetch";
 import { toast } from "sonner";
 
@@ -10,10 +10,10 @@ type Source = {
   path: string;
   id: string;
 }
-
-const pingEndpoint = async (endpoint: string): Promise<boolean> => {
+/*
+const pingEndpoint = async (_endpoint: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${endpoint}/ping`, {
+    const response = await fetch(`${getEndpoint()}/ping`, {
       method: 'GET'
     });
     return response.status === 200;
@@ -37,7 +37,7 @@ const isPasswordCorrect = async (password: string): Promise<boolean> => {
     return false;
   }
 }
-
+*/
 function TextEdit(props: {
   type?: string;
   readOnly?: boolean
@@ -236,6 +236,7 @@ function Themes() {
   )
 }
 
+/*
 function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsReadOnly: (status: boolean) => void }) {
   const [port, setPort] = useState('2425');
   const [address, setAddress] = useState('localhost');
@@ -356,12 +357,13 @@ function Endpoint(props: { setEndpointStatus: (status: boolean) => void, setIsRe
     </div>
   );
 }
+*/
 
 export function Settings() {
 
   const { data } = useQuery<Source[]>('settings', fetchSettings);
-  const [endpointStatus, setEndpointStatus] = useState(true);
-  const [isReadOnly, setIsReadOnly] = useState(false);
+  const [endpointStatus, _setEndpointStatus] = useState(true);
+  const [isReadOnly, _setIsReadOnly] = useState(true);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
@@ -372,7 +374,6 @@ export function Settings() {
     <div>
       <h1 className="text-6xl m-6 flex justify-center" style={{ fontFamily: "Helvetica-rounded-bold" }}>Settings</h1>
       <div>
-        <Endpoint setEndpointStatus={setEndpointStatus} setIsReadOnly={setIsReadOnly} />
         {endpointStatus && <Sources sources={sources} setSources={setSources} isReadOnly={isReadOnly} />}
         <Themes />
       </div>
