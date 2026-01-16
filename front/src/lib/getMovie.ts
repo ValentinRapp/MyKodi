@@ -22,6 +22,10 @@ export const getMovie = async (media: Partial<Media>): Promise<any> => {
         movieID = parseInt(media.name?.split('.')[0] || '808');
     }
 
+    if (isNaN(movieID)) {
+        movieID = 808;
+    }
+
     const movieData = await fetch(`https://api.themoviedb.org/3/movie/${movieID}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`).then(res => res.json());
 
     return movieData;

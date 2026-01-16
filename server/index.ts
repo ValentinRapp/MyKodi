@@ -24,7 +24,7 @@ await fastify.register(cors, {
 });
 
 fastify.addHook('onRequest', async (req, rep) => {    
-    if (['/ping', '/check_passwd', '/is_readonly', '/'].includes(req.url) || req.url.startsWith('/medias/') || PASSWORD === '') {
+    if (['/ping', '/check_passwd', '/is_readonly', '/favorites/add', '/'].includes(req.url) || req.url.startsWith('/medias/') || PASSWORD === '') {
         return;
     } else if (READONLY && req.method !== 'GET') {
         return rep.code(403).send(JSON.stringify({ message: "Unauthorized" }));
